@@ -173,6 +173,7 @@ if ENABLE_OIDC_AUTH:
     AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) + [
         "taiga_contrib_oidc_auth.oidc.TaigaOIDCAuthenticationBackend",
     ]
+    ROOT_URLCONF = "settings.urls"
     OIDC_CALLBACK_CLASS = "taiga_contrib_oidc_auth.views.TaigaOIDCAuthenticationCallbackView"
     OIDC_BASE_URL = os.getenv("OIDC_BASE_URL", "https://id.fedoraproject.org/openidc")
     OIDC_RP_SCOPES = os.getenv("OIDC_RP_SCOPES", "openid profile email")
@@ -183,6 +184,9 @@ if ENABLE_OIDC_AUTH:
     OIDC_OP_USER_ENDPOINT = os.getenv("OIDC_OP_USER_ENDPOINT", OIDC_BASE_URL + "/UserInfo")
     OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID")
     OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET")
+    print("ENABLE_OIDC_AUTH:", OIDC_BASE_URL, OIDC_BASE_URL)
+print("INSTALLED_APPS:", INSTALLED_APPS)
+print("AUTHENTICATION_BACKENDS:", AUTHENTICATION_BACKENDS)
 
 
 #########################################

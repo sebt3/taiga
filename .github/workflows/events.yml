@@ -1,4 +1,4 @@
-name: Build the taiga-back image
+name: Build the taiga-events image
 
 on:
   push:
@@ -13,8 +13,8 @@ jobs:
     - name: Get versions
       id: version
       run: |
-        echo "major=$(awk -F, '{print $2}' back/.tags)" >> $GITHUB_OUTPUT
-        echo "full=$(awk -F, '{print $1}' back/.tags)" >> $GITHUB_OUTPUT
+        echo "major=$(awk -F, '{print $2}' events/.tags)" >> $GITHUB_OUTPUT
+        echo "full=$(awk -F, '{print $1}' events/.tags)" >> $GITHUB_OUTPUT
 
     - name: Docker Setup qemu-action
       uses: docker/setup-qemu-action@v2
@@ -35,11 +35,11 @@ jobs:
     - name: Build the Docker image
       uses: docker/build-push-action@v3
       with:
-        context: ./back
-        file: ./back/Dockerfile
+        context: ./events
+        file: ./events/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
         tags: |
-          ${{ github.repository }}-back:latest
-          ${{ github.repository }}-back:${{ steps.version.outputs.full }}
-          ${{ github.repository }}-back:${{ steps.version.outputs.major }}
+          ${{ github.repository }}-events:latest
+          ${{ github.repository }}-events:${{ steps.version.outputs.full }}
+          ${{ github.repository }}-events:${{ steps.version.outputs.major }}

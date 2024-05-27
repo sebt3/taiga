@@ -44,15 +44,17 @@ RUN set -eux; \
     python manage.py compilemessages; \
     python manage.py collectstatic --no-input; \
     git clone --depth 1 https://github.com/taigaio/taiga-contrib-oidc-auth.git /tmp/taiga-contrib-oidc-auth; \
-    python -m pip install -e /tmp/taiga-contrib-oidc-auth/back install; rm -rf /tmp/taiga-contrib-oidc-auth; \
+    python -m pip install -e /tmp/taiga-contrib-oidc-auth/back install; \
+    (cd /tmp/taiga-contrib-oidc-auth/back; python setup.py install ||:); \
+    rm -rf /tmp/taiga-contrib-oidc-auth; \
     mv /tmp/config.py /tmp/urls.py /taiga-back/settings/; \
     chmod +x /usr/local/bin/entrypoint.sh; \
     chmod +x /usr/local/bin/async_entrypoint.sh; \
     #  create taiga group and user to use it and give permissions over the code (in entrypoint)
     groupadd --system taiga --gid=999; \
-    useradd --system --no-create-home --gid taiga --uid=999 --shell=/bin/bash taiga; \
+    useradd --system --gid taiga --uid=999 --shell=/bin/bash taiga; \
     mkdir -p /taiga-back/media/exports; \
-    chown -R taiga:taiga /taiga-back; \
+    chown -R taiga:taiga /taiga-back /home/taiga; \
     # remove unneeded files and packages
     apt-get purge -y \
        build-essential \

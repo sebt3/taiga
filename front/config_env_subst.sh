@@ -40,8 +40,8 @@ fi
 if [[ -z "${OIDC_BUTTON_ICON}" ]]; then
     export OIDC_BUTTON_ICON="fedora-logo.png"
 fi
-if [[ -z "${oidcMountPoint}" ]]; then
-    export oidcMountPoint="/api/oidc"
+if [[ -z "${OIDC_MOUNT_POINT}" ]]; then
+    export OIDC_MOUNT_POINT="/api/oidc"
 fi
 
 # Importers

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="/opt/venv/bin:$PATH"
 for file in $(ls /docker-entrypoint.d/*.sh 2>/dev/null||:);do
     echo "loading $file";
     . $file;
