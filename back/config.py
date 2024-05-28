@@ -6,7 +6,8 @@
 # Copyright (c) 2021-present Kaleidos INC
 
 from .common import *
-import os
+from ldap3 import Tls
+import os, sys, ssl
 
 
 #########################################
@@ -184,9 +185,63 @@ if ENABLE_OIDC_AUTH:
     OIDC_OP_USER_ENDPOINT = os.getenv("OIDC_OP_USER_ENDPOINT", OIDC_BASE_URL + "/UserInfo")
     OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID")
     OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET")
-    print("ENABLE_OIDC_AUTH:", OIDC_BASE_URL, OIDC_BASE_URL)
-print("INSTALLED_APPS:", INSTALLED_APPS)
-print("AUTHENTICATION_BACKENDS:", AUTHENTICATION_BACKENDS)
+
+if os.getenv('TAIGA_ENABLE_OPENID_AUTH', os.getenv('ENABLE_OPENID', 'False')).lower() == 'true':
+    INSTALLED_APPS += ["taiga_contrib_openid_auth"]
+    OPENID_USER_URL = os.getenv('TAIGA_OPENID_AUTH_USER_URL', os.getenv('OPENID_USER_URL'))
+    OPENID_TOKEN_URL = os.getenv('TAIGA_OPENID_AUTH_TOKEN_URL', os.getenv('OPENID_TOKEN_URL'))
+    OPENID_CLIENT_ID = os.getenv('TAIGA_OPENID_AUTH_CLIENT_ID', os.getenv('OPENID_CLIENT_ID'))
+    OPENID_CLIENT_SECRET = os.getenv('TAIGA_OPENID_AUTH_CLIENT_SECRET', os.getenv('OPENID_CLIENT_SECRET'))
+    OPENID_SCOPE = os.getenv('TAIGA_OPENID_SCOPE', os.getenv('OPENID_SCOPE'))
+
+if os.getenv('TAIGA_ENABLE_LDAP', os.getenv('ENABLE_LDAP', 'False')).lower() == 'true':
+    INSTALLED_APPS += ["taiga_contrib_ldap_auth_ext"]
+
+    if os.getenv('TAIGA_LDAP_USE_TLS', os.getenv('LDAP_START_TLS', 'False')).lower() == 'true':
+        # Flag to enable LDAP with STARTTLS before bind
+        LDAP_START_TLS = True
+        LDAP_TLS_CERTS = Tls(validate=ssl.CERT_NONE, version=ssl.PROTOCOL_TLSv1, ciphers='RSA+3DES')
+    else:
+        LDAP_START_TLS = False
+
+    LDAP_SERVER = os.getenv('TAIGA_LDAP_SERVER', os.getenv('LDAP_SERVER'))
+    LDAP_PORT = int(os.getenv('TAIGA_LDAP_PORT', os.getenv('LDAP_PORT', '389')))
+
+    # Full DN of the service account use to connect to LDAP server and search for login user's account entry
+    # If LDAP_BIND_DN is not specified, or is blank, then an anonymous bind is attempated
+    LDAP_BIND_DN = os.getenv('TAIGA_LDAP_BIND_DN', os.getenv('LDAP_BIND_DN'))
+    LDAP_BIND_PASSWORD = os.getenv('TAIGA_LDAP_BIND_PASSWORD', os.getenv('LDAP_BIND_PASSWORD'))
+
+    # Starting point within LDAP structure to search for login user
+    # Something like 'ou=People,dc=company,dc=com'
+    LDAP_SEARCH_BASE = os.getenv('TAIGA_LDAP_BASE_DN', os.getenv('LDAP_SEARCH_BASE'))
+
+    # Additional search criteria to the filter (will be ANDed)
+    #LDAP_SEARCH_FILTER_ADDITIONAL = '(mail=*)'
+
+    # Names of attributes to get username, e-mail and full name values from
+    # These fields need to have a value in LDAP
+    LDAP_USERNAME_ATTRIBUTE = os.getenv('TAIGA_LDAP_USERNAME_ATTRIBUTE', os.getenv('LDAP_USERNAME_ATTRIBUTE'))
+    LDAP_EMAIL_ATTRIBUTE = os.getenv('TAIGA_LDAP_EMAIL_ATTRIBUTE', os.getenv('LDAP_EMAIL_ATTRIBUTE'))
+    LDAP_FULL_NAME_ATTRIBUTE = os.getenv('TAIGA_LDAP_FULL_NAME_ATTRIBUTE', os.getenv('LDAP_FULL_NAME_ATTRIBUTE'))
+
+    # Option to not store the passwords in the local db
+    if os.getenv('TAIGA_LDAP_SAVE_LOGIN_PASSWORD', os.getenv('LDAP_SAVE_LOGIN_PASSWORD', 'False')).lower() == 'false':
+        LDAP_SAVE_LOGIN_PASSWORD = False
+
+    # Fallback on normal authentication method if this LDAP auth fails. Uncomment to enable.
+    LDAP_FALLBACK = os.getenv('TAIGA_LDAP_FALLBACK', os.getenv('LDAP_FALLBACK', 'normal'))
+
+    # Function to map LDAP username to local DB user unique identifier.
+    # Upon successful LDAP bind, will override returned username attribute
+    # value. May result in unexpected failures if changed after the database
+    # has been populated.
+    def _ldap_slugify(uid: str) -> str:
+        # example: force lower-case
+        uid = uid.lower()
+        return uid
+
+    LDAP_MAP_USERNAME_TO_UID = _ldap_slugify
 
 
 #########################################

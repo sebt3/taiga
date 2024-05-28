@@ -30,7 +30,7 @@ if [ ${PUBLIC_REGISTER_ENABLED} == "true" ]; then
         contribs+=('"plugins/gitlab-auth/gitlab-auth.json"')
     fi
 fi
-OIDC support
+# OIDC support
 if [ ${ENABLE_OIDC_AUTH} == "true" ]; then
     contribs+=('"plugins/oidc-auth/oidc-auth.json"')
 fi
@@ -42,6 +42,10 @@ if [[ -z "${OIDC_BUTTON_ICON}" ]]; then
 fi
 if [[ -z "${OIDC_MOUNT_POINT}" ]]; then
     export OIDC_MOUNT_POINT="/api/oidc"
+fi
+# OpenID support
+if [ ${ENABLE_OPENID_AUTH} == "true" ]; then
+    contribs+=('"plugins/openid-auth/openid-auth.json"')
 fi
 
 # Importers

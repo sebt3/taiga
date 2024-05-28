@@ -39,6 +39,10 @@ RUN set -eux; \
     wget "http://github.com/taigaio/taiga-contrib-gitlab-auth/archive/$(sed 's/.*,//' /tmp/.tags).0.zip" -O source.zip; \
     unzip -j source.zip "taiga-contrib-gitlab-auth-$(sed 's/.*,//' /tmp/.tags).0/front/dist/*" -d gitlab-auth; \
     rm source.zip; \
+    # OpenID
+    wget "https://github.com/robrotheram/taiga-contrib-openid-auth/archive/6.5.1.zip" -O source.zip; \
+    unzip -j source.zip "taiga-contrib-openid-auth-6.5.1/front/dist/*" -d openid-auth; \
+    rm source.zip; \
     # Remove unused dependencies
     apk del --no-cache .build-deps; \
     # Ready for nginx
@@ -47,3 +51,13 @@ RUN set -eux; \
 
 COPY --from=builder /plugins/front/dist/ /usr/share/nginx/html/plugins/oidc-auth/
 COPY conf.json.template /usr/share/nginx/html/
+ENV ENABLE_GITLAB_AUTH=false \
+    GITLAB_API_CLIENT_ID= \
+    GITLAB_URL=https://gitlab.com \
+    ENABLE_GITHUB_AUTH=false \
+    GITHUB_AUTH_CLIENT_ID= \
+    ENABLE_OPENID_AUTH=false \
+    OPENID_URL= \
+    OPENID_SCOPE="openid email" \
+    OPENID_NAME= \
+    OPENID_CLIENT_ID=
